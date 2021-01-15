@@ -43,6 +43,7 @@ def _vested() -> uint256:
 def mint(receiver: address = msg.sender, amount: uint256 = MAX_UINT256):
     assert msg.sender == self.governance  # dev: unauthorized
     tokens: uint256 = min(self._vested() - self.minted, amount)
+    assert tokens > 0  # dev: not mintable
     self.yfi.mint(receiver, tokens)
     self.minted += tokens
 
@@ -61,12 +62,12 @@ def mintable() -> uint256:
 
 @external
 def set_governance(governance: address):
-    assert msg.sender == self.governance
+    assert msg.sender == self.governance  # dev: unauthorized
     self.pending_governance = governance
 
 
 @external
 def accept_governance():
-    assert msg.sender == self.pending_governance
+    assert msg.sender == self.pending_governance  # dev: unauthorized
     self.governance = msg.sender
     self.pending_governance = ZERO_ADDRESS
