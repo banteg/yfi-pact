@@ -9,7 +9,7 @@ interface YFI:
 
 # 3333 YFI over 5 years starting from YFI birthday
 total: constant(uint256) = 3333 * 10 ** 18
-start: constant(uint256) = 1597845648
+start: constant(uint256) = 1594972885
 duration: constant(uint256) = 5 * 365 * 86400
 
 yfi: public(YFI)
