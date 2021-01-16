@@ -5,6 +5,9 @@ interface YFI:
     def governance() -> address: view
     def mint(account: address, amount: uint256): nonpayable
     def addMinter(minter: address): nonpayable
+    def removeMinter(minter: address): nonpayable
+    def setGovernance(governance: address): nonpayable
+    def transferFrom(sender: address, receiver: address, amount: uint256) -> bool: nonpayable
 
 
 # 3333 YFI over 5 years starting from YFI birthday
@@ -17,6 +20,11 @@ signed: public(bool)
 governance: public(address)
 pending_governance: public(address)
 minted: public(uint256)
+
+# 3333 YFI must be sacrificed to break the pact
+breakage: constant(uint256) = 3333 * 10 ** 18
+broken: public(bool)
+sacrificed: public(HashMap[address, uint256])
 
 
 @external
@@ -31,6 +39,24 @@ def sign():
     assert self.yfi.governance() == self  # dev: pact not yfi governance
     self.yfi.addMinter(self)
     self.signed = True
+
+
+@external
+def break_pact(new_pact: address):
+    assert self.signed  # dev: no pact signed
+    assert not self.broken  # dev: pact already broken
+    assert self.sacrificed[new_pact] >= breakage  # dev: not enough sacrificed
+    self.yfi.removeMinter(self)
+    self.yfi.setGovernance(new_pact)
+    self.broken = True
+
+
+@external
+def tribute(new_pact: address, amount: uint256):
+    assert self.signed  # dev: no pact signed
+    assert not self.broken  # dev: pact already broken
+    self.yfi.transferFrom(msg.sender, self, amount)
+    self.sacrificed[new_pact] += amount
 
 
 @view
