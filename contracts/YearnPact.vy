@@ -10,10 +10,9 @@ interface YFI:
     def transferFrom(sender: address, receiver: address, amount: uint256) -> bool: nonpayable
 
 
-# 3333 YFI over 5 years starting from YFI birthday
-total: constant(uint256) = 3333 * 10 ** 18
+# 666 YFI per year starting from YFI birthday
+rate: constant(uint256) = (666 * 10 ** 18) / (365 * 86400)
 start: constant(uint256) = 1594972885
-duration: constant(uint256) = 5 * 365 * 86400
 
 yfi: public(YFI)
 signed: public(bool)
@@ -34,7 +33,7 @@ def __init__():
 
 
 @external
-def sign():
+def sign_pact():
     assert not self.signed  # dev: pact signed
     assert self.yfi.governance() == self  # dev: pact not yfi governance
     self.yfi.addMinter(self)
@@ -62,7 +61,7 @@ def tribute(new_pact: address, amount: uint256):
 @view
 @internal
 def _vested() -> uint256:
-    return min(total, total * (block.timestamp - start) / duration)
+    return rate * (block.timestamp - start)
 
 
 @external

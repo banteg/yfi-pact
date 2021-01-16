@@ -10,7 +10,7 @@ def test_migration_from_timelock(yfi, timelock, pact, chain):
     chain.mine(timelock.period())
     timelock.updateTargetGovernance()
     assert yfi.governance() == pact
-    pact.sign()
+    pact.sign_pact()
     chain.sleep(5 * 86400 * 365)
     pact.mint()
     assert pact.minted() == "3333 ether"
@@ -20,7 +20,7 @@ def test_migration_from_timelock(yfi, timelock, pact, chain):
 def test_migration_fake_gov(yfi, a, pact, chain):
     gov = a.at(yfi.governance(), force=True)
     yfi.setGovernance(pact, {"from": gov})
-    pact.sign()
+    pact.sign_pact()
     pact.mint()
     print("pact minted", pact.minted().to("ether"))
     print("yfi supply", yfi.totalSupply().to("ether"))
@@ -29,8 +29,8 @@ def test_migration_fake_gov(yfi, a, pact, chain):
     pact.mint()
     print("pact minted", pact.minted().to("ether"))
     print("yfi supply", yfi.totalSupply().to("ether"))
-    assert pact.minted() == "3333 ether"
-    assert yfi.totalSupply() == "33333 ether"
+    assert pact.minted() > "3333 ether"
+    assert yfi.totalSupply() > "33333 ether"
 
 
 def test_migration_caveats(yfi, a, pact, chain):
@@ -38,15 +38,15 @@ def test_migration_caveats(yfi, a, pact, chain):
 
     # can't sign because pact is not governance
     with brownie.reverts("dev: pact not yfi governance"):
-        pact.sign()
+        pact.sign_pact()
 
     yfi.setGovernance(pact, {"from": gov})
     assert yfi.governance() == pact
-    pact.sign()
+    pact.sign_pact()
 
     # can't sign the pact twice
     with brownie.reverts("dev: pact signed"):
-        pact.sign()
+        pact.sign_pact()
 
     with brownie.reverts("dev: unauthorized"):
         pact.mint({"from": a[1]})
