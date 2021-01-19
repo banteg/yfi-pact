@@ -5,69 +5,37 @@ interface YFI:
     def governance() -> address: view
     def mint(account: address, amount: uint256): nonpayable
     def addMinter(minter: address): nonpayable
+    def removeMinter(minter: address): nonpayable
+    def setGovernance(governance: address): nonpayable
 
 
-# 3333 YFI over 5 years starting from YFI birthday
-total: constant(uint256) = 3333 * 10 ** 18
-start: constant(uint256) = 1594972885
-duration: constant(uint256) = 5 * 365 * 86400
+# One-off mint of 6666 YFI
+total: constant(uint256) = 6666 * 10 ** 18
+treasury: constant(address) = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52
+timelock: constant(address) = 0x026D4b8d693f6C446782c2C61ee357Ec561DFB61
 
 yfi: public(YFI)
-signed: public(bool)
-governance: public(address)
-pending_governance: public(address)
-minted: public(uint256)
+minted: public(bool)
 
 
 @external
 def __init__():
-    self.governance = msg.sender
     self.yfi = YFI(0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e)
 
 
 @external
-def sign():
-    assert not self.signed  # dev: pact signed
-    assert self.yfi.governance() == self  # dev: pact not yfi governance
+def brrr():
+    assert not self.minted  # dev: already minted
+    assert self.yfi.governance() == self  # dev: not governance
     self.yfi.addMinter(self)
-    self.signed = True
-
-
-@view
-@internal
-def _vested() -> uint256:
-    return min(total, total * (block.timestamp - start) / duration)
+    self.yfi.mint(treasury, total)
+    self.yfi.removeMinter(self)
+    self.yfi.setGovernance(timelock)
+    self.minted = True
 
 
 @external
-def mint(receiver: address = msg.sender, amount: uint256 = MAX_UINT256):
-    assert msg.sender == self.governance  # dev: unauthorized
-    tokens: uint256 = min(self._vested() - self.minted, amount)
-    assert tokens > 0  # dev: not mintable
-    self.yfi.mint(receiver, tokens)
-    self.minted += tokens
-
-
-@view
-@external
-def vested() -> uint256:
-    return self._vested()
-
-
-@view
-@external
-def mintable() -> uint256:
-    return self._vested() - self.minted
-
-
-@external
-def set_governance(governance: address):
-    assert msg.sender == self.governance  # dev: unauthorized
-    self.pending_governance = governance
-
-
-@external
-def accept_governance():
-    assert msg.sender == self.pending_governance  # dev: unauthorized
-    self.governance = msg.sender
-    self.pending_governance = ZERO_ADDRESS
+def revoke():
+    assert self.minted  # dev: not minted
+    assert self.yfi.governance() == self  # dev: not governance
+    self.yfi.setGovernance(timelock)

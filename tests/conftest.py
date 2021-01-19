@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def shared_setup(fn_isolation):
     pass
 
@@ -21,3 +21,8 @@ def timelock(interface, a):
 @pytest.fixture()
 def pact(YearnPact, a):
     return YearnPact.deploy({"from": a[0]})
+
+
+@pytest.fixture()
+def treasury(a, web3):
+    return a.at(web3.ens.resolve("ychad.eth"), force=True)
