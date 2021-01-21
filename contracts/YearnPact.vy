@@ -12,7 +12,6 @@ interface YFI:
 # One-off mint of 6666 YFI
 total: constant(uint256) = 6666 * 10 ** 18
 treasury: constant(address) = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52
-timelock: constant(address) = 0x026D4b8d693f6C446782c2C61ee357Ec561DFB61
 
 yfi: public(YFI)
 
