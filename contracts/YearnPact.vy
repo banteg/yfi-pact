@@ -30,12 +30,5 @@ def brrr():
     self.yfi.addMinter(self)
     self.yfi.mint(treasury, total)
     self.yfi.removeMinter(self)
-    self.yfi.setGovernance(timelock)
+    self.yfi.setGovernance(ZERO_ADDRESS)  # burn the keys
     self.minted = True
-
-
-@external
-def revoke():
-    assert self.minted  # dev: not minted
-    assert self.yfi.governance() == self  # dev: not governance
-    self.yfi.setGovernance(timelock)
