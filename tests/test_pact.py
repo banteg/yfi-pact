@@ -1,4 +1,5 @@
 import brownie
+from brownie import ZERO_ADDRESS
 
 
 def test_migration_from_timelock(yfi, timelock, pact, chain, treasury):
@@ -17,19 +18,10 @@ def test_migration_from_timelock(yfi, timelock, pact, chain, treasury):
     assert yfi.totalSupply() == "36666 ether"
     assert yfi.balanceOf(treasury) - before == "6666 ether"
 
-    with brownie.reverts("dev: already minted"):
+    with brownie.reverts("dev: not governance"):
         pact.brrr()
 
-    # timelock has a bug which allows to bounce the pending governance back
-    timelock.updateTargetGovernance()
-    assert yfi.governance() == pact
-
-    with brownie.reverts("dev: already minted"):
-        pact.brrr()
-
-    # pact can recover from this state by bouncing it back to timelock
-    pact.revoke()
-    assert yfi.governance() == timelock
+    assert yfi.governance() == ZERO_ADDRESS
 
 
 def test_migration_fake_gov(yfi, a, pact, treasury):
@@ -37,14 +29,12 @@ def test_migration_fake_gov(yfi, a, pact, treasury):
     yfi.setGovernance(pact, {"from": gov})
     before = yfi.balanceOf(treasury)
 
-    with brownie.reverts("dev: not minted"):
-        pact.revoke()
-
     pact.brrr()
 
-    with brownie.reverts("dev: already minted"):
+    with brownie.reverts("dev: not governance"):
         pact.brrr()
 
     print("yfi supply", yfi.totalSupply().to("ether"))
     assert yfi.totalSupply() == "36666 ether"
     assert yfi.balanceOf(treasury) - before == "6666 ether"
+    assert yfi.governance() == ZERO_ADDRESS

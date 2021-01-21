@@ -15,7 +15,6 @@ treasury: constant(address) = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52
 timelock: constant(address) = 0x026D4b8d693f6C446782c2C61ee357Ec561DFB61
 
 yfi: public(YFI)
-minted: public(bool)
 
 
 @external
@@ -25,10 +24,8 @@ def __init__():
 
 @external
 def brrr():
-    assert not self.minted  # dev: already minted
     assert self.yfi.governance() == self  # dev: not governance
     self.yfi.addMinter(self)
     self.yfi.mint(treasury, total)
     self.yfi.removeMinter(self)
     self.yfi.setGovernance(ZERO_ADDRESS)  # burn the keys
-    self.minted = True
