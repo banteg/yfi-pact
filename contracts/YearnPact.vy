@@ -2,7 +2,6 @@
 from vyper.interfaces import ERC20
 
 interface YFI:
-    def governance() -> address: view
     def mint(account: address, amount: uint256): nonpayable
     def addMinter(minter: address): nonpayable
     def removeMinter(minter: address): nonpayable
@@ -23,7 +22,6 @@ def __init__():
 
 @external
 def brrr():
-    assert self.yfi.governance() == self  # dev: not governance
     self.yfi.addMinter(self)
     self.yfi.mint(treasury, total)
     self.yfi.removeMinter(self)
